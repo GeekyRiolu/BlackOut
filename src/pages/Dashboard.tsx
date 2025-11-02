@@ -36,9 +36,9 @@ import {
   ScatterChart,
   Scatter
 } from "recharts";
-import IndiaGeoMap from "@/components/IndiaGeoMap";
+import OSMMap from "@/components/OSMMap";
 
-const IndiaMapWrapper = (props: any) => <IndiaGeoMap {...props} />;
+const IndiaMapWrapper = (props: any) => <OSMMap {...props} />;
 import { incidents, filmCensorshipCases } from "@/data";
 
 const Dashboard = () => {
