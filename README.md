@@ -31,9 +31,11 @@ What BlackOut tries to achieve
 
 ## Architecture
 
-> [PLACEHOLDER — add architecture diagram here]
+## Architecture
 
-(Place your architecture image here — e.g., `docs/architecture.png` or a public URL.)
+![Architecture](src/assets/Arch.png)
+
+(If the image does not render on your deployment, place the file at `docs/architecture.png` or point to a public URL.)
 
 
 ## Datasets
@@ -43,7 +45,7 @@ This project stores canonical data inside the repository under `src/data/` and c
 - FSC_extractor
 	- The `FSC_extractor` is the data-ingestion component used to parse, clean, and transform scraped or provided inputs into the repository's canonical datasets.
 	- Use it to automate extraction from court orders, platform transparency reports, or CSV/JSON input.
-	- (Add documentation or link to the extractor tool here.)
+	- Notebook and extractor link: [FSC_Extractor ipynb](Data_Extractor/FSC_Extractor.ipynb)
 
 - Film dataset
 	- The repository contains a film censorship dataset (years 2019–2025) with deterministic cuts/reasons/appeals generation.
