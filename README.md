@@ -47,7 +47,7 @@ This project stores canonical data inside the repository under `src/data/` and c
 	- Notebook and extractor link: [FSC_Extractor ipynb](Data_Extractor/FSC_Extractor.ipynb)
 
 - Film dataset
-	- The repository contains a film censorship dataset (years 2019–2025) with deterministic cuts/reasons/appeals generation.
+	- The repository contains a film censorship dataset (years 2019–2025) with deterministic cuts/reasons/appeals generation. The dataset is paid, but some data fields are free to use which I have used.
 	- Link to Dataset: [https://dataful.in/datasets/21452/]
 
 - Blocked websites dataset
