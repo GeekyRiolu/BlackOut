@@ -44,6 +44,7 @@ export default function IndiaGeoMap({ selectedState, onSelectState, width = 800,
 
   const [geo, setGeo] = useState<any | null>(null);
   const [geographies, setGeographies] = useState<any[] | null>(null);
+  const [featureLabels, setFeatureLabels] = useState<Array<string>>([]);
 
   useEffect(() => {
     fetch("/india-composite.geojson")
@@ -51,6 +52,18 @@ export default function IndiaGeoMap({ selectedState, onSelectState, width = 800,
       .then((data) => {
         setGeo(data);
         if (data && data.features) setGeographies(data.features);
+        // build a list of label-candidates for each feature to improve matching
+        try {
+          const labels = (data.features || []).map((f: any, idx: number) => {
+            const props = f.properties || {};
+            const vals = Object.values(props).filter(Boolean).join(" ");
+            // include common fallbacks
+            return (vals || props.NAME || props.name || props.ST_NM || props.STATE_NAME || `feature-${idx}`).toString();
+          });
+          setFeatureLabels(labels.map((l: string) => normalizeName(l)));
+        } catch (e) {
+          // ignore
+        }
       })
       .catch((err) => console.error("Failed loading india geojson:", err));
   }, []);
@@ -69,7 +82,21 @@ export default function IndiaGeoMap({ selectedState, onSelectState, width = 800,
 
   function findFeatureByName(normName: string) {
     if (!geographies) return null;
-    return geographies.find((g) => normalizeName(getFeatureName(g)) === normName) || null;
+    // direct name match
+    const direct = geographies.find((g) => normalizeName(getFeatureName(g)) === normName);
+    if (direct) return direct;
+
+    // try matching against precomputed featureLabels (contains normalized props)
+    if (featureLabels && featureLabels.length === geographies.length) {
+      const idx = featureLabels.findIndex((lab) => lab && lab.indexOf(normName) !== -1 || normName.indexOf(lab) !== -1);
+      if (idx >= 0) return geographies[idx];
+    }
+
+    // fallback: check if normalized state appears anywhere in the serialized feature
+    const idx = geographies.findIndex((g) => JSON.stringify(g).toLowerCase().indexOf(normName) !== -1);
+    if (idx >= 0) return geographies[idx];
+
+    return null;
   }
 
   const [tooltip, setTooltip] = useState<{ x: number; y: number; text: string } | null>(null);

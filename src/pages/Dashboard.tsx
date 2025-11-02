@@ -117,11 +117,22 @@ const Dashboard = () => {
   // Calculate category distribution (for pie chart)
   const categoryData = useMemo(() => {
     const categoryMap = new Map<string, number>();
-    
-    incidents.forEach(inc => {
+
+    incidents.forEach((inc) => {
       categoryMap.set(inc.category, (categoryMap.get(inc.category) || 0) + 1);
     });
-    
+
+    // split small categories (<5) into an "Other" bucket
+    const major: Array<{ name: string; value: number }> = [];
+    let otherTotal = 0;
+    Array.from(categoryMap.entries()).forEach(([name, value]) => {
+      if (value < 5) otherTotal += value;
+      else major.push({ name, value });
+    });
+
+    // Sort majors
+    major.sort((a, b) => b.value - a.value);
+
     const colors = [
       "hsl(var(--chart-1))",
       "hsl(var(--chart-2))",
@@ -130,14 +141,13 @@ const Dashboard = () => {
       "hsl(var(--chart-5))",
       "hsl(var(--muted-foreground))",
     ];
-    
-    return Array.from(categoryMap.entries())
-      .map(([name, value], index) => ({ 
-        name, 
-        value, 
-        color: colors[index % colors.length] 
-      }))
-      .sort((a, b) => b.value - a.value);
+
+    const result: Array<{ name: string; value: number; color: string }> = major.map((m, i) => ({ name: m.name, value: m.value, color: colors[i % colors.length] }));
+    if (otherTotal > 0) {
+      result.push({ name: "Other", value: otherTotal, color: "hsl(var(--muted-foreground))" });
+    }
+
+    return result;
   }, []);
 
   // Calculate state distribution
@@ -424,28 +434,50 @@ const Dashboard = () => {
               </ResponsiveContainer>
               
               <div className="space-y-4">
-                {categoryData.map((category, index) => (
-                  <div 
-                    key={index} 
-                    className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
-                      selectedCategory === category.name 
-                        ? "bg-primary/10 border-2 border-primary" 
-                        : "bg-muted/50 hover:bg-muted"
-                    }`}
-                    onClick={() => handleChartClick({ name: category.name }, "category")}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div 
-                        className="w-4 h-4 rounded"
-                        style={{ backgroundColor: category.color }}
+                {/* Small bar chart to complement pie */}
+                <div style={{ width: "100%", height: 180 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={categoryData} layout="vertical" margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" stroke="hsl(var(--muted-foreground))" />
+                      <YAxis type="category" dataKey="name" width={140} stroke="hsl(var(--muted-foreground))" />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
                       />
-                      <span className="font-medium text-foreground">{category.name}</span>
+                      <Bar dataKey="value" isAnimationActive={false} onClick={(d) => handleChartClick(d, "category")}>
+                        {categoryData.map((entry, i) => (
+                          <Cell key={`bar-${i}`} fill={entry.color} style={{ cursor: 'pointer' }} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Detailed list (clickable) */}
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {categoryData.map((category, index) => (
+                    <div 
+                      key={index} 
+                      className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
+                        selectedCategory === category.name 
+                          ? "bg-primary/10 border-2 border-primary" 
+                          : "bg-muted/50 hover:bg-muted"
+                      }`}
+                      onClick={() => handleChartClick({ name: category.name }, "category")}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div 
+                          className="w-4 h-4 rounded"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        <span className="font-medium text-foreground">{category.name}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-muted-foreground">
+                        {category.value.toLocaleString()}
+                      </span>
                     </div>
-                    <span className="text-sm font-semibold text-muted-foreground">
-                      {category.value.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </CardContent>
