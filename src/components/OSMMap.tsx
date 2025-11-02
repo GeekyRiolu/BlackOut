@@ -41,7 +41,11 @@ function FlyToState({ selectedState }: { selectedState: string | null }) {
     if (!selectedState) return;
     const coords = STATE_COORDS[selectedState];
     if (coords) {
-      map.flyTo(coords as [number, number], 6, { duration: 1.2 });
+      // Smoothly fly to the state's coords and zoom in by 2 levels from current
+      const currentZoom = (map.getZoom && map.getZoom()) || 4;
+      const maxZoom = (map.getMaxZoom && map.getMaxZoom()) || 18;
+      const targetZoom = Math.min(maxZoom, currentZoom + 2);
+      map.flyTo(coords as [number, number], targetZoom, { duration: 1.2 });
     }
   }, [selectedState, map]);
 
@@ -62,7 +66,8 @@ const OSMMap: React.FC<{ states: StatePoint[]; selectedState: string | null; onS
   const max = Math.max(...states.map(s => s.incidents), 1);
 
   return (
-    <MapContainer center={center} zoom={4} style={{ height: 420, width: '100%' }} scrollWheelZoom={false}>
+    // Start map slightly more zoomed in (+2 from previous default)
+    <MapContainer center={center} zoom={6} style={{ height: 420, width: '100%' }} scrollWheelZoom={false}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

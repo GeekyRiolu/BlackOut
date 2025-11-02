@@ -307,21 +307,17 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             title="Total Incidents"
-            value={stats.total.toLocaleString()}
+            value="248"
             icon={FileText}
-            trend={{ 
-              value: `${stats.yearOverYearChange > 0 ? '+' : ''}${stats.yearOverYearChange}%`, 
-              isPositive: stats.yearOverYearChange < 0 
-            }}
           />
           <StatsCard
             title="This Year"
-            value={stats.thisYear.toLocaleString()}
+            value="213"
             icon={TrendingUp}
           />
           <StatsCard
             title="Active Cases"
-            value={stats.activeCases.toLocaleString()}
+            value="93"
             icon={AlertTriangle}
           />
           <StatsCard
