@@ -36,6 +36,9 @@ import {
   ScatterChart,
   Scatter
 } from "recharts";
+import IndiaGeoMap from "@/components/IndiaGeoMap";
+
+const IndiaMapWrapper = (props: any) => <IndiaGeoMap {...props} />;
 import { incidents, filmCensorshipCases } from "@/data";
 
 const Dashboard = () => {
@@ -456,67 +459,17 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Bubble Chart representing states */}
-              <ResponsiveContainer width="100%" height={400}>
-                <ScatterChart>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    type="number" 
-                    dataKey="x" 
-                    name="Longitude"
-                    stroke="hsl(var(--muted-foreground))"
-                    hide
-                  />
-                  <YAxis 
-                    type="number" 
-                    dataKey="y" 
-                    name="Latitude"
-                    stroke="hsl(var(--muted-foreground))"
-                    hide
-                  />
-                  <Tooltip
-                    cursor={{ strokeDasharray: '3 3' }}
-                    content={({ active, payload }) => {
-                      if (active && payload && payload[0]) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-                            <p className="font-semibold">{data.state}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {data.incidents.toLocaleString()} incidents
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Scatter 
-                    data={stateData} 
-                    fill="hsl(var(--chart-1))"
-                    onClick={(data: any) => {
-                      if (data && data.payload) {
-                        handleChartClick({ state: data.payload.state }, "state");
-                      }
-                    }}
-                    cursor="pointer"
-                    shape={(props: any) => {
-                      const { cx, cy, payload } = props;
-                      const radius = Math.sqrt(payload.incidents / 10) + 5;
-                      return (
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={radius}
-                          fill="hsl(var(--chart-1))"
-                          opacity={0.6}
-                          style={{ cursor: "pointer" }}
-                        />
-                      );
-                    }}
-                  />
-                </ScatterChart>
-              </ResponsiveContainer>
+              {/* India map with clickable state hotspots */}
+              <div className="w-full">
+                {/* Lazy import component to keep bundle small if needed later */}
+                {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
+                {/* @ts-ignore */}
+                <IndiaMapWrapper
+                  states={stateData}
+                  selectedState={selectedState}
+                  onSelectState={(st: string | null) => handleChartClick({ state: st }, 'state')}
+                />
+              </div>
 
               {/* State list with incident counts */}
               <div className="space-y-2">
@@ -574,7 +527,11 @@ const Dashboard = () => {
                 <TableBody>
                   {filteredIncidents.length > 0 ? (
                     filteredIncidents.map((incident) => (
-                      <TableRow key={incident.id}>
+                      <TableRow
+                        key={incident.id}
+                        className={`cursor-pointer ${selectedState === incident.state ? 'bg-primary/10 border-2 border-primary' : ''}`}
+                        onClick={() => setSelectedState(incident.state)}
+                      >
                         <TableCell className="font-medium">{incident.title}</TableCell>
                         <TableCell>
                           {new Date(incident.date).toLocaleDateString()}
