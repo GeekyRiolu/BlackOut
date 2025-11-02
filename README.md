@@ -51,7 +51,7 @@ This project stores canonical data inside the repository under `src/data/` and c
 	- Link to Dataset: [https://dataful.in/datasets/21452/]
 
 - Blocked websites dataset
-	- The blocked websites dataset contains ~50–60 entries covering 2019–2025 and is used to compute charts and aggregates at runtime.
+	- The blocked websites dataset contains 1000+ entries covering 2019–2025 and is used to compute charts and aggregates at runtime.
 	- Link to Dataset: [[https://dataful.in/datasets/21452/](https://github.com/thejeshgn/blocked)]
 
 
