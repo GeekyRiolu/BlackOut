@@ -29,6 +29,12 @@ export const Navigation = () => {
               <Link to="/archive">Archive</Link>
             </Button>
             <Button variant="ghost" asChild>
+              <Link to="/film-censorship">Film Censorship</Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link to="/blocked-websites">Blocked Websites</Link>
+            </Button>
+            <Button variant="ghost" asChild>
               <Link to="/about">About</Link>
             </Button>
           </div>
@@ -55,6 +61,12 @@ export const Navigation = () => {
             </Button>
             <Button variant="ghost" className="w-full justify-start" asChild>
               <Link to="/archive" onClick={() => setIsOpen(false)}>Archive</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start" asChild>
+              <Link to="/film-censorship" onClick={() => setIsOpen(false)}>Film Censorship</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start" asChild>
+              <Link to="/blocked-websites" onClick={() => setIsOpen(false)}>Blocked Websites</Link>
             </Button>
             <Button variant="ghost" className="w-full justify-start" asChild>
               <Link to="/about" onClick={() => setIsOpen(false)}>About</Link>

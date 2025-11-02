@@ -7,6 +7,9 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Archive from "./pages/Archive";
 import About from "./pages/About";
+import FilmCensorship from "./pages/FilmCensorship";
+import BlockedWebsites from "./pages/BlockedWebsites";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +24,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/archive" element={<Archive />} />
+          <Route path="/film-censorship" element={<FilmCensorship />} />
+          <Route path="/blocked-websites" element={<BlockedWebsites />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
