@@ -67,13 +67,34 @@ const rawFilms = [
   { year: 2024, title: "MAIDAAN" },
 ];
 
-export const filmCensorshipCases: FilmCase[] = rawFilms.map((f, idx) => ({
-  id: idx + 1,
-  title: f.title,
-  year: f.year,
-  decision: "passed",
-  cuts: 0,
-}));
+// Deterministic helper used to synthesize cuts and decisions so the
+// yearly aggregates are repeatable and the charts reflect films with cuts.
+function hashNumber(n: number) {
+  let h = n | 0;
+  h = ((h >>> 16) ^ h) * 0x45d9f3b;
+  h = ((h >>> 16) ^ h) * 0x45d9f3b;
+  h = (h >>> 16) ^ h;
+  return Math.abs(h);
+}
+
+export const filmCensorshipCases: FilmCase[] = rawFilms.map((f, idx) => {
+  const id = idx + 1;
+  const seed = hashNumber(id * 9973 + f.year);
+
+  // Decide final decision deterministically. Do not produce 'rejected' here.
+  let decision: FilmCase['decision'] = 'passed';
+  if (seed % 3 === 0) decision = 'passed_with_cuts';
+
+  const cuts = decision === 'passed_with_cuts' ? (seed % 3) + 1 : 0;
+
+  return {
+    id,
+    title: f.title,
+    year: f.year,
+    decision,
+    cuts,
+  };
+});
 
 // Compute yearly aggregates from the dataset
 const yearMap: Record<number, { total: number; passed: number; withCuts: number; rejected: number }> = {};
