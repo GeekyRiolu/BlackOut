@@ -12,6 +12,17 @@ import {
   BarChart3
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import IncidentForm from "@/components/IncidentForm";
+
+// Use the source asset so Vite resolves it in dev and production.
 import heroBanner from "@/assets/hero-banner.jpg";
 
 const Index = () => {
@@ -167,9 +178,18 @@ const Index = () => {
             Contribute data, report incidents, or support our mission to maintain transparency
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary">
-              Submit an Incident
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="lg" variant="secondary">Submit an Incident</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Submit an Incident</DialogTitle>
+                </DialogHeader>
+                <IncidentForm />
+              </DialogContent>
+            </Dialog>
+
             <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
               Contact Us
             </Button>
