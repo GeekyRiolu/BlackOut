@@ -48,3 +48,4 @@ ${deduplicated.join(",\n")}
 fs.writeFileSync(incidentsPath, newContent, 'utf-8');
 console.log(`✓ Deduplicated incidents: ${incidents.length} unique incidents (down from ${content.match(/id: \d+,/g)?.length || 0})`);
 
+

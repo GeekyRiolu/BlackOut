@@ -22,3 +22,4 @@ const fixedContent = content.replace(/\{\s*id: (\d+),/g, (match, idStr) => {
 fs.writeFileSync(incidentsPath, fixedContent, 'utf-8');
 console.log(`✓ Fixed IDs in incidents.ts`);
 
+
