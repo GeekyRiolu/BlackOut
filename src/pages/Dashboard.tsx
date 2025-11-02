@@ -20,10 +20,8 @@ import {
   X,
   Filter
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   PieChart,
@@ -38,70 +36,7 @@ import {
   ScatterChart,
   Scatter
 } from "recharts";
-
-// Incident data structure
-interface Incident {
-  id: number;
-  title: string;
-  date: string;
-  year: number;
-  state: string;
-  district?: string;
-  platform: string;
-  authority: string;
-  category: string;
-  reason: string;
-}
-
-const yearlyData = [
-  { year: "2019", incidents: 1842 },
-  { year: "2020", incidents: 2156 },
-  { year: "2021", incidents: 2834 },
-  { year: "2022", incidents: 3124 },
-  { year: "2023", incidents: 2891 },
-  { year: "2024", incidents: 2456 },
-];
-
-const categoryData = [
-  { name: "Misinformation", value: 4523, color: "hsl(var(--chart-1))" },
-  { name: "Political Content", value: 3214, color: "hsl(var(--chart-2))" },
-  { name: "Hate Speech", value: 2156, color: "hsl(var(--chart-3))" },
-  { name: "National Security", value: 1834, color: "hsl(var(--chart-4))" },
-  { name: "Defamation", value: 1456, color: "hsl(var(--chart-5))" },
-  { name: "Copyright", value: 1120, color: "hsl(var(--muted-foreground))" },
-];
-
-const platformData = [
-  { platform: "Twitter/X", count: 4234 },
-  { platform: "Facebook", count: 3456 },
-  { platform: "YouTube", count: 2134 },
-  { platform: "Instagram", count: 1678 },
-  { platform: "Websites", count: 1345 },
-];
-
-// State-wise data for geo-mapping
-const stateData = [
-  { state: "Maharashtra", incidents: 2845, x: 10, y: 15 },
-  { state: "Delhi", incidents: 2456, x: 8, y: 8 },
-  { state: "Karnataka", incidents: 2134, x: 7, y: 12 },
-  { state: "Tamil Nadu", incidents: 1987, x: 9, y: 18 },
-  { state: "West Bengal", incidents: 1876, x: 10, y: 11 },
-  { state: "Uttar Pradesh", incidents: 1756, x: 9, y: 9 },
-  { state: "Gujarat", incidents: 1645, x: 7, y: 13 },
-  { state: "Kerala", incidents: 1543, x: 8, y: 17 },
-  { state: "Rajasthan", incidents: 1432, x: 7, y: 10 },
-  { state: "Telangana", incidents: 1321, x: 8, y: 14 },
-];
-
-// Sample incident data
-const allIncidents: Incident[] = [
-  { id: 1, title: "Twitter posts removed in Maharashtra", date: "2024-10-15", year: 2024, state: "Maharashtra", district: "Mumbai", platform: "Twitter/X", authority: "MEITy", category: "Misinformation", reason: "False information about health" },
-  { id: 2, title: "YouTube channel blocked in Delhi", date: "2024-10-12", year: 2024, state: "Delhi", platform: "YouTube", authority: "Ministry of I&B", category: "Political Content", reason: "Political misinformation" },
-  { id: 3, title: "Facebook page removed in Karnataka", date: "2024-10-08", year: 2024, state: "Karnataka", district: "Bangalore", platform: "Facebook", authority: "State Police", category: "Hate Speech", reason: "Hate speech allegations" },
-  { id: 4, title: "Website blocked in Tamil Nadu", date: "2024-10-05", year: 2024, state: "Tamil Nadu", district: "Chennai", platform: "Website", authority: "High Court", category: "Defamation", reason: "Defamatory content" },
-  { id: 5, title: "Instagram account suspended in West Bengal", date: "2024-09-28", year: 2024, state: "West Bengal", platform: "Instagram", authority: "MEITy", category: "National Security", reason: "Security concerns" },
-  { id: 6, title: "Social media posts removed in UP", date: "2024-09-20", year: 2024, state: "Uttar Pradesh", district: "Lucknow", platform: "Twitter/X", authority: "State Police", category: "Misinformation", reason: "False news" },
-];
+import { incidents, filmCensorshipCases } from "@/data";
 
 const Dashboard = () => {
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
@@ -109,13 +44,161 @@ const Dashboard = () => {
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [selectedState, setSelectedState] = useState<string | null>(null);
 
-  const filteredIncidents = allIncidents.filter((incident) => {
-    const matchesYear = !selectedYear || incident.year.toString() === selectedYear;
+  // Calculate statistics from real data
+  const stats = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const lastYear = currentYear - 1;
+    
+    // Get years from dates
+    const incidentsThisYear = incidents.filter(inc => {
+      const year = new Date(inc.date).getFullYear();
+      return year === currentYear;
+    }).length;
+    
+    const incidentsLastYear = incidents.filter(inc => {
+      const year = new Date(inc.date).getFullYear();
+      return year === lastYear;
+    }).length;
+    
+    const totalIncidents = incidents.length;
+    const activeCases = incidents.filter(inc => inc.status === "Pending" || inc.status === "Under Review").length;
+    const uniqueStates = new Set(incidents.map(inc => inc.state)).size;
+    
+    const yearOverYearChange = lastYear > 0 
+      ? Math.round(((incidentsThisYear - incidentsLastYear) / incidentsLastYear) * 100)
+      : 0;
+    
+    return {
+      total: totalIncidents,
+      thisYear: incidentsThisYear,
+      activeCases,
+      statesAffected: uniqueStates,
+      yearOverYearChange,
+    };
+  }, []);
+
+  // Calculate yearly trends
+  const yearlyData = useMemo(() => {
+    const yearMap = new Map<string, number>();
+    
+    incidents.forEach(inc => {
+      const year = new Date(inc.date).getFullYear().toString();
+      yearMap.set(year, (yearMap.get(year) || 0) + 1);
+    });
+    
+    // Include film censorship years if they have data
+    filmCensorshipCases.forEach(film => {
+      const year = film.year.toString();
+      yearMap.set(year, (yearMap.get(year) || 0) + 1);
+    });
+    
+    return Array.from(yearMap.entries())
+      .map(([year, incidents]) => ({ year, incidents }))
+      .sort((a, b) => a.year.localeCompare(b.year));
+  }, []);
+
+  // Calculate platform distribution
+  const platformData = useMemo(() => {
+    const platformMap = new Map<string, number>();
+    
+    incidents.forEach(inc => {
+      const platform = inc.platform === "Website" ? "Websites" : inc.platform;
+      platformMap.set(platform, (platformMap.get(platform) || 0) + 1);
+    });
+    
+    return Array.from(platformMap.entries())
+      .map(([platform, count]) => ({ platform, count }))
+      .sort((a, b) => b.count - a.count);
+  }, []);
+
+  // Calculate category distribution (for pie chart)
+  const categoryData = useMemo(() => {
+    const categoryMap = new Map<string, number>();
+    
+    incidents.forEach(inc => {
+      categoryMap.set(inc.category, (categoryMap.get(inc.category) || 0) + 1);
+    });
+    
+    const colors = [
+      "hsl(var(--chart-1))",
+      "hsl(var(--chart-2))",
+      "hsl(var(--chart-3))",
+      "hsl(var(--chart-4))",
+      "hsl(var(--chart-5))",
+      "hsl(var(--muted-foreground))",
+    ];
+    
+    return Array.from(categoryMap.entries())
+      .map(([name, value], index) => ({ 
+        name, 
+        value, 
+        color: colors[index % colors.length] 
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, []);
+
+  // Calculate state distribution
+  const stateData = useMemo(() => {
+    const stateMap = new Map<string, number>();
+    
+    incidents.forEach(inc => {
+      stateMap.set(inc.state, (stateMap.get(inc.state) || 0) + 1);
+    });
+    
+    // Simple x,y coordinates for scatter plot (approximate positions)
+    const stateCoords: { [key: string]: { x: number; y: number } } = {
+      "Maharashtra": { x: 10, y: 15 },
+      "Delhi": { x: 8, y: 8 },
+      "Karnataka": { x: 7, y: 12 },
+      "Tamil Nadu": { x: 9, y: 18 },
+      "West Bengal": { x: 10, y: 11 },
+      "Uttar Pradesh": { x: 9, y: 9 },
+      "Gujarat": { x: 7, y: 13 },
+      "Kerala": { x: 8, y: 17 },
+      "Rajasthan": { x: 7, y: 10 },
+      "Telangana": { x: 8, y: 14 },
+      "Andhra Pradesh": { x: 8, y: 15 },
+      "Assam": { x: 11, y: 10 },
+      "Bihar": { x: 9, y: 10 },
+      "Haryana": { x: 8, y: 9 },
+      "Himachal Pradesh": { x: 7, y: 7 },
+      "Jammu and Kashmir": { x: 7, y: 6 },
+      "Jharkhand": { x: 9, y: 11 },
+      "Madhya Pradesh": { x: 8, y: 11 },
+      "Manipur": { x: 11, y: 9 },
+      "Nagaland": { x: 12, y: 9 },
+      "Odisha": { x: 9, y: 13 },
+      "Punjab": { x: 7, y: 8 },
+      "Uttarakhand": { x: 8, y: 8 },
+      "All India": { x: 8, y: 10 },
+    };
+    
+    return Array.from(stateMap.entries())
+      .map(([state, incidents]) => {
+        const coords = stateCoords[state] || { x: 8, y: 10 };
+        return { 
+          state, 
+          incidents, 
+          x: coords.x, 
+          y: coords.y 
+        };
+      })
+      .sort((a, b) => b.incidents - a.incidents);
+  }, []);
+
+  // Filter incidents based on selections
+  const filteredIncidents = useMemo(() => {
+    return incidents.filter((incident) => {
+      const year = new Date(incident.date).getFullYear().toString();
+      const matchesYear = !selectedYear || year === selectedYear;
     const matchesCategory = !selectedCategory || incident.category === selectedCategory;
-    const matchesPlatform = !selectedPlatform || incident.platform === selectedPlatform;
+      const matchesPlatform = !selectedPlatform || 
+        (selectedPlatform === "Websites" && incident.platform === "Website") ||
+        incident.platform === selectedPlatform;
     const matchesState = !selectedState || incident.state === selectedState;
     return matchesYear && matchesCategory && matchesPlatform && matchesState;
   });
+  }, [selectedYear, selectedCategory, selectedPlatform, selectedState]);
 
   const handleChartClick = (data: any, chartType: string) => {
     if (chartType === "year") {
@@ -192,23 +275,26 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatsCard
             title="Total Incidents"
-            value="12,847"
+            value={stats.total.toLocaleString()}
             icon={FileText}
-            trend={{ value: "+23%", isPositive: false }}
+            trend={{ 
+              value: `${stats.yearOverYearChange > 0 ? '+' : ''}${stats.yearOverYearChange}%`, 
+              isPositive: stats.yearOverYearChange < 0 
+            }}
           />
           <StatsCard
             title="This Year"
-            value="2,456"
+            value={stats.thisYear.toLocaleString()}
             icon={TrendingUp}
           />
           <StatsCard
             title="Active Cases"
-            value="342"
+            value={stats.activeCases.toLocaleString()}
             icon={AlertTriangle}
           />
           <StatsCard
             title="States Affected"
-            value="28"
+            value={stats.statesAffected.toLocaleString()}
             icon={Globe}
           />
         </div>
@@ -408,18 +494,27 @@ const Dashboard = () => {
                   <Scatter 
                     data={stateData} 
                     fill="hsl(var(--chart-1))"
-                    onClick={(data) => handleChartClick(data, "state")}
-                  >
-                    {stateData.map((entry, index) => {
-                      const size = Math.sqrt(entry.incidents / 10);
+                    onClick={(data: any) => {
+                      if (data && data.payload) {
+                        handleChartClick({ state: data.payload.state }, "state");
+                      }
+                    }}
+                    cursor="pointer"
+                    shape={(props: any) => {
+                      const { cx, cy, payload } = props;
+                      const radius = Math.sqrt(payload.incidents / 10) + 5;
                       return (
-                        <Cell 
-                          key={`cell-${index}`}
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={radius}
+                          fill="hsl(var(--chart-1))"
+                          opacity={0.6}
                           style={{ cursor: "pointer" }}
                         />
                       );
-                    })}
-                  </Scatter>
+                    }}
+                  />
                 </ScatterChart>
               </ResponsiveContainer>
 
@@ -490,7 +585,7 @@ const Dashboard = () => {
                         <TableCell>
                           <Badge variant="outline">{incident.category}</Badge>
                         </TableCell>
-                        <TableCell className="max-w-xs truncate">{incident.reason}</TableCell>
+                        <TableCell className="max-w-xs truncate">{incident.legalReason}</TableCell>
                       </TableRow>
                     ))
                   ) : (
