@@ -233,7 +233,7 @@ const BlockedWebsites = () => {
   // site state: start with the generated initial set and replace when MASTER_LIST is loaded
   const [blockedWebsites, setBlockedWebsites] = useState<BlockedWebsite[]>(initialBlockedWebsites);
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 15;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
