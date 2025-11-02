@@ -56,7 +56,8 @@ const IncidentForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+  // limit form height so dialog doesn't grow too tall; scroll internally if needed
+  <form onSubmit={handleSubmit} className="space-y-4 max-h-[520px] overflow-y-auto pr-2 no-scrollbar">
       <div>
         <label className="text-sm font-medium">Title*</label>
         <Input value={form.title} onChange={(e) => update('title', e.target.value)} />

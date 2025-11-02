@@ -38,7 +38,7 @@ import {
   TrendingUp,
   Link2
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -54,6 +54,14 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 // Blocked website data
 interface BlockedWebsite {
@@ -161,6 +169,8 @@ blockedWebsites.forEach(s => { authorityCounts[s.authority] = (authorityCounts[s
 const authorityData = Object.entries(authorityCounts).map(([authority, count]) => ({ authority, count }));
 
 const BlockedWebsites = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -179,6 +189,14 @@ const BlockedWebsites = () => {
     
     return matchesSearch && matchesYear && matchesCategory && matchesStatus;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedYear, selectedCategory, selectedStatus]);
+
+  const totalFiltered = filteredWebsites.length;
+  const pageCount = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+  const pagedWebsites = filteredWebsites.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const totalBlocked = blockedWebsites.filter(s => s.status === "blocked").length;
   const totalUnblocked = blockedWebsites.filter(s => s.status === "unblocked").length;
@@ -506,8 +524,8 @@ const BlockedWebsites = () => {
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {filteredWebsites.map((site) => (
+                  <TableBody>
+                    {pagedWebsites.map((site) => (
                     <TableRow key={site.id}>
                       <TableCell className="font-medium">{site.domain}</TableCell>
                       <TableCell>
@@ -616,6 +634,27 @@ const BlockedWebsites = () => {
                   <p className="text-muted-foreground">
                     No websites found matching your search criteria.
                   </p>
+                </div>
+              )}
+              {/* Pagination controls for main table */}
+              {filteredWebsites.length > 0 && (
+                <div className="flex items-center justify-end mt-4">
+                  <Pagination>
+                    <PaginationPrevious onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} />
+                    <PaginationContent className="mx-4">
+                      {Array.from({ length: pageCount }).map((_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            isActive={currentPage === i + 1}
+                            onClick={() => setCurrentPage(i + 1)}
+                          >
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                    </PaginationContent>
+                    <PaginationNext onClick={() => setCurrentPage(Math.min(pageCount, currentPage + 1))} />
+                  </Pagination>
                 </div>
               )}
             </div>

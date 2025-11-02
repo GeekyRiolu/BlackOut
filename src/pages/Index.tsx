@@ -69,9 +69,9 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard
               title="Total Incidents"
-              value="12,847"
+              value="248"
               icon={FileText}
-              trend={{ value: "+23%", isPositive: false }}
+              trend={{ value: "+53%", isPositive: false }}
             />
             <StatsCard
               title="Platforms Affected"
@@ -81,15 +81,15 @@ const Index = () => {
             />
             <StatsCard
               title="Active Cases"
-              value="342"
+              value="93"
               description="Pending verification"
               icon={AlertTriangle}
             />
             <StatsCard
               title="This Year"
-              value="2,456"
+              value="213"
               icon={TrendingUp}
-              trend={{ value: "+18%", isPositive: false }}
+              trend={{ value: "+587%", isPositive: false }}
             />
           </div>
         </div>
@@ -190,8 +190,8 @@ const Index = () => {
               </DialogContent>
             </Dialog>
 
-            <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
-              Contact Us
+            <Button size="lg" variant="secondary" asChild>
+              <Link to="/about#contact">Contact Us</Link>
             </Button>
           </div>
         </div>

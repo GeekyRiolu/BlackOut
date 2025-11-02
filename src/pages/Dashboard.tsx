@@ -20,7 +20,7 @@ import {
   X,
   Filter
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -37,11 +37,21 @@ import {
   Scatter
 } from "recharts";
 import OSMMap from "@/components/OSMMap";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const IndiaMapWrapper = (props: any) => <OSMMap {...props} />;
 import { incidents, filmCensorshipCases } from "@/data";
 
 const Dashboard = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
@@ -212,6 +222,15 @@ const Dashboard = () => {
     return matchesYear && matchesCategory && matchesPlatform && matchesState;
   });
   }, [selectedYear, selectedCategory, selectedPlatform, selectedState]);
+
+  // Reset page when filters change so user sees first page of new results
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedYear, selectedCategory, selectedPlatform, selectedState]);
+
+  const totalFiltered = filteredIncidents.length;
+  const pageCount = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+  const pagedIncidents = filteredIncidents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const handleChartClick = (data: any, chartType: string) => {
     if (chartType === "year") {
@@ -557,8 +576,8 @@ const Dashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredIncidents.length > 0 ? (
-                    filteredIncidents.map((incident) => (
+                  {pagedIncidents.length > 0 ? (
+                    pagedIncidents.map((incident) => (
                       <TableRow
                         key={incident.id}
                         className={`cursor-pointer ${selectedState === incident.state ? 'bg-primary/10 border-2 border-primary' : ''}`}
@@ -587,6 +606,37 @@ const Dashboard = () => {
                 </TableBody>
               </Table>
             </div>
+            {/* Pagination */}
+            {totalFiltered > PAGE_SIZE && (
+              <div className="mt-4 flex items-center justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        className={currentPage === 1 ? 'opacity-50 pointer-events-none' : ''}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: pageCount }).map((_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          isActive={currentPage === i + 1}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage((p) => Math.min(pageCount, p + 1))}
+                        className={currentPage === pageCount ? 'opacity-50 pointer-events-none' : ''}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

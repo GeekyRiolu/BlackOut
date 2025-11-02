@@ -38,7 +38,7 @@ import {
   TrendingUp,
   Scale
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { yearlyFilmData, filmCensorshipCases } from "@/data/filmCensorship";
 import {
   LineChart,
@@ -52,6 +52,14 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 // Sample CBFC film data
 interface FilmCensorshipCase {
@@ -208,6 +216,8 @@ const filmCases: FilmCensorshipCase[] = filmCensorshipCases.map((f) => {
 // reflects the expanded dataset (2019-2025).
 
 const FilmCensorship = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedDecision, setSelectedDecision] = useState("all");
@@ -223,6 +233,14 @@ const FilmCensorship = () => {
     
     return matchesSearch && matchesYear && matchesDecision;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedYear, selectedDecision]);
+
+  const totalFiltered = filteredCases.length;
+  const pageCount = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+  const pagedCases = filteredCases.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const totalFilms = filmCases.length;
   const withCuts = filmCases.filter(f => f.finalDecision === "passed_with_cuts").length;
@@ -396,7 +414,7 @@ const FilmCensorship = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCases.map((film) => (
+                  {pagedCases.map((film) => (
                     <TableRow key={film.id}>
                       <TableCell className="font-medium">{film.title}</TableCell>
                       <TableCell>{film.producer}</TableCell>
@@ -572,6 +590,27 @@ const FilmCensorship = () => {
                   <p className="text-muted-foreground">
                     No cases found matching your search criteria.
                   </p>
+                </div>
+              )}
+              {/* Pagination controls */}
+              {filteredCases.length > 0 && (
+                <div className="flex items-center justify-end mt-4">
+                  <Pagination>
+                    <PaginationPrevious onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} />
+                    <PaginationContent className="mx-4">
+                      {Array.from({ length: pageCount }).map((_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            isActive={currentPage === i + 1}
+                            onClick={() => setCurrentPage(i + 1)}
+                          >
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                    </PaginationContent>
+                    <PaginationNext onClick={() => setCurrentPage(Math.min(pageCount, currentPage + 1))} />
+                  </Pagination>
                 </div>
               )}
             </div>

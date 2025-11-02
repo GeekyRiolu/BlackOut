@@ -98,7 +98,7 @@ const About = () => {
           </div>
 
           {/* Contact */}
-          <Card>
+          <Card id="contact">
             <CardHeader>
               <CardTitle>Get Involved</CardTitle>
             </CardHeader>
