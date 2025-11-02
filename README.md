@@ -106,7 +106,7 @@ If you'd like to contribute:
 
 ## License & Attribution
 
-This project was developed during the SFLC.in Hackathon. Check `LICENSE` in the repository for the license (if provided). OpenStreetMap tiles are used under their attribution requirements.
+This project was developed during the SFLC.in Hackathon. Check `LICENSE` in the repository for the license. OpenStreetMap tiles are used under their attribution requirements.
 
 
 ## Contact
