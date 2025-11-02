@@ -275,19 +275,19 @@ const BlockedWebsites = () => {
           const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           return { id, url: u, domain, date, year, reason, authority, status, category };
         });
-        // Ensure at least 60 additional entries are allocated to years 2023-2025
-        const countTargetYears = generated.filter(x => x.year >= 2023 && x.year <= 2025).length;
-        const needed = Math.max(0, 60 - countTargetYears);
-        const extra: BlockedWebsite[] = [];
-        if (needed > 0) {
-          // Take further URLs (if available) deterministically to fill the gap
-          const startIdx = useCount;
-          for (let j = 0; j < needed && (startIdx + j) < urls.length; j++) {
-            const u = urls[startIdx + j];
-            const id = generated.length + extra.length + 1;
-            const seed = hashNumber(id * 7919 + u.length);
+        // Ensure at least 60 entries for each year 2023, 2024, 2025 (if enough URLs exist)
+        const withExtras = [...generated];
+        let cursor = useCount; // next URL index to consume for extras
+
+        for (const targetYear of [2023, 2024, 2025]) {
+          const have = withExtras.filter(x => x.year === targetYear).length;
+          const need = Math.max(0, 60 - have);
+          for (let n = 0; n < need && cursor < urls.length; n++, cursor++) {
+            const u = urls[cursor];
+            const id = withExtras.length + 1;
+            const seed = hashNumber(id * (7919 + targetYear) + u.length);
             const domain = u.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-            const year = 2023 + (seed % 3); // force into 2023..2025
+            const year = targetYear;
             const reason = REASONS[seed % REASONS.length];
             const category = CATEGORY_MAP[reason] || 'Other';
             const authority = AUTHORITIES[seed % AUTHORITIES.length];
@@ -295,36 +295,11 @@ const BlockedWebsites = () => {
             const month = 1 + (seed % 12);
             const day = 1 + ((seed >> 3) % 26);
             const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            extra.push({ id, url: u, domain, date, year, reason, authority, status, category });
+            withExtras.push({ id, url: u, domain, date, year, reason, authority, status, category });
           }
         }
 
-        // Ensure enough entries for 2023-2025 (previous step) then also ensure 2025 has extra coverage
-        const withExtras = generated.concat(extra);
-        const count2025 = withExtras.filter(x => x.year === 2025).length;
-        const need2025 = Math.max(0, 60 - count2025);
-        const extra2025: BlockedWebsite[] = [];
-        if (need2025 > 0) {
-          const startIdx2 = useCount + extra.length;
-          for (let k = 0; k < need2025 && (startIdx2 + k) < urls.length; k++) {
-            const u = urls[startIdx2 + k];
-            const id = withExtras.length + extra2025.length + 1;
-            const seed = hashNumber(id * 3253 + u.length);
-            const domain = u.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-            const year = 2025; // force into 2025
-            const reason = REASONS[seed % REASONS.length];
-            const category = CATEGORY_MAP[reason] || 'Other';
-            const authority = AUTHORITIES[seed % AUTHORITIES.length];
-            const status = STATUS_CHOICES[seed % STATUS_CHOICES.length];
-            const month = 1 + (seed % 12);
-            const day = 1 + ((seed >> 3) % 26);
-            const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            extra2025.push({ id, url: u, domain, date, year, reason, authority, status, category });
-          }
-        }
-
-        const final = withExtras.concat(extra2025);
-        setBlockedWebsites(final);
+        setBlockedWebsites(withExtras);
       }
     }).catch(() => {
       // ignore, keep initial data
