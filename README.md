@@ -2,7 +2,7 @@
 
 **Project:** BlackOut (built during SFLC.in Hackathon)
 
-**Focus:** Documenting free speech violations — online content takedowns, website blocking, and film censorship in India.
+**Focus:** Documenting free speech violations online content takedowns, website blocking, and film censorship in India.
 
 
 ## Overview
