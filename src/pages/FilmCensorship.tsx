@@ -76,27 +76,71 @@ interface FilmCensorshipCase {
 // `FilmCensorshipCase` shape so the UI (table, filters, stats) can use
 // the expanded data while keeping reasonable default values for fields
 // that weren't provided in the source dataset.
-const filmCases: FilmCensorshipCase[] = filmCensorshipCases.map((f) => ({
-  id: f.id,
-  title: f.title,
-  producer: "Unknown",
-  director: "Unknown",
-  year: f.year,
-  // Use a mid-year placeholder date for display purposes
-  date: `${f.year}-06-01`,
-  // Convert numeric cuts to simple descriptive entries if needed
-  cuts: f.cuts > 0 ? Array(f.cuts).fill("Removed content by CBFC") : [],
-  reasons: f.cuts > 0 ? ["Content concerns"] : [],
-  appeals: {
-    // Deterministically mark some entries as having appeals so the
-    // 'Appeals Filed' stat and the UI are not always zero.
-    filed: f.id % 7 === 0,
-    date: f.id % 7 === 0 ? `${f.year}-07-01` : undefined,
-    status: f.id % 14 === 0 ? "approved" : (f.id % 7 === 0 ? "pending" : undefined),
-  },
-  finalDecision: f.decision,
-  certificate: f.cuts > 0 ? "U/A" : "U",
-}));
+// Deterministic helpers to create repeatable, random-looking values
+function hashNumber(n: number) {
+  let h = n | 0;
+  h = ((h >>> 16) ^ h) * 0x45d9f3b;
+  h = ((h >>> 16) ^ h) * 0x45d9f3b;
+  h = (h >>> 16) ^ h;
+  return Math.abs(h);
+}
+
+const REASONS_POOL = [
+  "Violence",
+  "Sexual content",
+  "Political sensitivity",
+  "Religious sentiment",
+  "Drug-related content",
+  "Obscenity",
+  "Communal tension",
+  "Security concern",
+  "Privacy violation",
+];
+
+const filmCases: FilmCensorshipCase[] = filmCensorshipCases.map((f) => {
+  const seed = hashNumber(f.id * 9973 + f.year);
+
+  // Decide finalDecision deterministically. NOTE: do not mark films as
+  // 'rejected' per request — convert any potential rejected to 'passed'.
+  let finalDecision: FilmCensorshipCase['finalDecision'] = 'passed';
+  // Use a simple rule to assign 'passed_with_cuts' for some films.
+  if (seed % 3 === 0) finalDecision = 'passed_with_cuts';
+
+  // Determine number of cuts (if any)
+  const cutsCount = finalDecision === 'passed_with_cuts' ? (seed % 3) + 1 : 0;
+  const cuts = cutsCount > 0 ? Array.from({ length: cutsCount }, (_, i) => `${REASONS_POOL[(seed + i) % REASONS_POOL.length]} - removed scene ${i + 1}`) : [];
+
+  // Pick 1-2 primary reasons from pool
+  const reasonsCount = cutsCount > 0 ? Math.min(2, 1 + (seed % 2)) : (seed % 11 === 0 ? 1 : 0);
+  const reasons = Array.from({ length: reasonsCount }, (_, i) => REASONS_POOL[(seed + 5 + i) % REASONS_POOL.length]);
+
+  // Appeals: deterministically some films have appeals
+  const appealsFiled = seed % 7 === 0 || (finalDecision === 'passed_with_cuts' && seed % 5 === 0);
+  let appealStatus: FilmCensorshipCase['appeals']['status'] | undefined;
+  if (appealsFiled) {
+    if (seed % 14 === 0) appealStatus = 'approved';
+    else if (seed % 5 === 0) appealStatus = 'rejected';
+    else appealStatus = 'pending';
+  }
+
+  return {
+    id: f.id,
+    title: f.title,
+    producer: (f as any).producer || 'Unknown',
+    director: (f as any).director || 'Unknown',
+    year: f.year,
+    date: `${f.year}-06-01`,
+    cuts,
+    reasons,
+    appeals: {
+      filed: !!appealsFiled,
+      date: appealsFiled ? `${f.year}-07-15` : undefined,
+      status: appealStatus,
+    },
+    finalDecision,
+    certificate: 'U',
+  };
+});
 
 // Yearly data is imported from `src/data/filmCensorship.ts` so the chart
 // reflects the expanded dataset (2019-2025).

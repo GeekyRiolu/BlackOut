@@ -67,125 +67,98 @@ interface BlockedWebsite {
   status: "blocked" | "unblocked" | "partial";
   category: string;
 }
-
 const blockedWebsites: BlockedWebsite[] = [
-  {
-    id: 1,
-    url: "example-pirate-site.com",
-    domain: "example-pirate-site.com",
-    date: "2024-01-15",
-    year: 2024,
-    reason: "Copyright infringement",
-    authority: "Delhi High Court",
-    status: "blocked",
-    category: "Copyright"
-  },
-  {
-    id: 2,
-    url: "political-blog.org",
-    domain: "political-blog.org",
-    date: "2024-02-20",
-    year: 2024,
-    reason: "Defamatory content",
-    authority: "Supreme Court",
-    status: "blocked",
-    category: "Defamation"
-  },
-  {
-    id: 3,
-    url: "news-site.net",
-    domain: "news-site.net",
-    date: "2023-11-10",
-    year: 2023,
-    reason: "Fake news",
-    authority: "Ministry of Electronics and IT",
-    status: "blocked",
-    category: "Misinformation"
-  },
-  {
-    id: 4,
-    url: "social-media-platform.in",
-    domain: "social-media-platform.in",
-    date: "2023-09-05",
-    year: 2023,
-    reason: "Non-compliance with IT Rules",
-    authority: "Ministry of Electronics and IT",
-    status: "partial",
-    category: "Compliance"
-  },
-  {
-    id: 5,
-    url: "torrent-site.io",
-    domain: "torrent-site.io",
-    date: "2024-03-12",
-    year: 2024,
-    reason: "Copyright violation",
-    authority: "Bombay High Court",
-    status: "blocked",
-    category: "Copyright"
-  },
-  {
-    id: 6,
-    url: "gaming-platform.com",
-    domain: "gaming-platform.com",
-    date: "2022-07-18",
-    year: 2022,
-    reason: "Security concerns",
-    authority: "Cybersecurity Agency",
-    status: "blocked",
-    category: "Security"
-  },
-  {
-    id: 7,
-    url: "file-sharing.net",
-    domain: "file-sharing.net",
-    date: "2023-05-22",
-    year: 2023,
-    reason: "Piracy facilitation",
-    authority: "Copyright Office",
-    status: "blocked",
-    category: "Copyright"
-  },
-  {
-    id: 8,
-    url: "controversial-blog.co.in",
-    domain: "controversial-blog.co.in",
-    date: "2024-04-08",
-    year: 2024,
-    reason: "Hate speech",
-    authority: "State Police",
-    status: "blocked",
-    category: "Hate Speech"
-  },
+  // Existing examples (kept)
+  { id: 1, url: "example-pirate-site.com", domain: "example-pirate-site.com", date: "2024-01-15", year: 2024, reason: "Copyright infringement", authority: "Delhi High Court", status: "blocked", category: "Copyright" },
+  { id: 2, url: "political-blog.org", domain: "political-blog.org", date: "2024-02-20", year: 2024, reason: "Defamatory content", authority: "Supreme Court", status: "blocked", category: "Defamation" },
+  { id: 3, url: "news-site.net", domain: "news-site.net", date: "2023-11-10", year: 2023, reason: "Fake news", authority: "Ministry of Electronics and IT", status: "blocked", category: "Misinformation" },
+  { id: 4, url: "social-media-platform.in", domain: "social-media-platform.in", date: "2023-09-05", year: 2023, reason: "Non-compliance with IT Rules", authority: "Ministry of Electronics and IT", status: "partial", category: "Compliance" },
+  { id: 5, url: "torrent-site.io", domain: "torrent-site.io", date: "2024-03-12", year: 2024, reason: "Copyright violation", authority: "Bombay High Court", status: "blocked", category: "Copyright" },
+  { id: 6, url: "gaming-platform.com", domain: "gaming-platform.com", date: "2022-07-18", year: 2022, reason: "Security concerns", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 7, url: "file-sharing.net", domain: "file-sharing.net", date: "2023-05-22", year: 2023, reason: "Piracy facilitation", authority: "Copyright Office", status: "blocked", category: "Copyright" },
+  { id: 8, url: "controversial-blog.co.in", domain: "controversial-blog.co.in", date: "2024-04-08", year: 2024, reason: "Hate speech", authority: "State Police", status: "blocked", category: "Hate Speech" },
+
+  // Additional generated entries (fill to ~55)
+  { id: 9, url: "archive-press.com", domain: "archive-press.com", date: "2019-02-11", year: 2019, reason: "Misinformation", authority: "MEITy", status: "blocked", category: "Misinformation" },
+  { id: 10, url: "piratebay-copy.org", domain: "piratebay-copy.org", date: "2019-03-05", year: 2019, reason: "Piracy", authority: "High Courts", status: "blocked", category: "Copyright" },
+  { id: 11, url: "radical-opinion.in", domain: "radical-opinion.in", date: "2019-06-21", year: 2019, reason: "Hate speech", authority: "State Police", status: "blocked", category: "Hate Speech" },
+  { id: 12, url: "leak-site.net", domain: "leak-site.net", date: "2019-08-14", year: 2019, reason: "Data leak", authority: "Cybersecurity Agency", status: "partial", category: "Security" },
+  { id: 13, url: "fake-news-hub.com", domain: "fake-news-hub.com", date: "2020-01-30", year: 2020, reason: "Fake news", authority: "MEITy", status: "blocked", category: "Misinformation" },
+  { id: 14, url: "defame-now.org", domain: "defame-now.org", date: "2020-02-18", year: 2020, reason: "Defamatory content", authority: "Civil Court", status: "blocked", category: "Defamation" },
+  { id: 15, url: "stream-steal.io", domain: "stream-steal.io", date: "2020-05-26", year: 2020, reason: "Piracy", authority: "High Courts", status: "blocked", category: "Copyright" },
+  { id: 16, url: "malware-drop.com", domain: "malware-drop.com", date: "2020-07-12", year: 2020, reason: "Security threat", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 17, url: "provocateur.in", domain: "provocateur.in", date: "2020-09-01", year: 2020, reason: "Incitement", authority: "State Police", status: "blocked", category: "Hate Speech" },
+  { id: 18, url: "forum-shutdown.net", domain: "forum-shutdown.net", date: "2021-03-10", year: 2021, reason: "Non-compliance", authority: "MEITy", status: "partial", category: "Compliance" },
+  { id: 19, url: "copyright-claim.org", domain: "copyright-claim.org", date: "2021-04-22", year: 2021, reason: "Copyright", authority: "Copyright Office", status: "blocked", category: "Copyright" },
+  { id: 20, url: "hoax-portal.com", domain: "hoax-portal.com", date: "2021-06-30", year: 2021, reason: "Misinformation", authority: "MEITy", status: "blocked", category: "Misinformation" },
+  { id: 21, url: "anon-share.io", domain: "anon-share.io", date: "2021-08-14", year: 2021, reason: "Piracy", authority: "High Courts", status: "blocked", category: "Copyright" },
+  { id: 22, url: "phish-zone.com", domain: "phish-zone.com", date: "2021-10-19", year: 2021, reason: "Phishing", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 23, url: "state-hate.org", domain: "state-hate.org", date: "2022-01-05", year: 2022, reason: "Hate speech", authority: "State Police", status: "blocked", category: "Hate Speech" },
+  { id: 24, url: "unverified-news.net", domain: "unverified-news.net", date: "2022-02-11", year: 2022, reason: "Fake news", authority: "MEITy", status: "partial", category: "Misinformation" },
+  { id: 25, url: "leaked-docs.io", domain: "leaked-docs.io", date: "2022-03-22", year: 2022, reason: "Privacy breach", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 26, url: "copycat-streams.com", domain: "copycat-streams.com", date: "2022-05-08", year: 2022, reason: "Piracy", authority: "High Courts", status: "blocked", category: "Copyright" },
+  { id: 27, url: "offensive-posts.org", domain: "offensive-posts.org", date: "2022-07-19", year: 2022, reason: "Hate speech", authority: "State Police", status: "blocked", category: "Hate Speech" },
+  { id: 28, url: "untruths.com", domain: "untruths.com", date: "2022-09-25", year: 2022, reason: "Misinformation", authority: "MEITy", status: "blocked", category: "Misinformation" },
+  { id: 29, url: "forum-breach.net", domain: "forum-breach.net", date: "2023-01-02", year: 2023, reason: "Security vulnerability", authority: "Cybersecurity Agency", status: "partial", category: "Security" },
+  { id: 30, url: "libel-now.com", domain: "libel-now.com", date: "2023-02-14", year: 2023, reason: "Defamation", authority: "Civil Court", status: "blocked", category: "Defamation" },
+  { id: 31, url: "old-archive.org", domain: "old-archive.org", date: "2023-03-28", year: 2023, reason: "Copyright complaint", authority: "Copyright Office", status: "blocked", category: "Copyright" },
+  { id: 32, url: "danger-file.com", domain: "danger-file.com", date: "2023-04-18", year: 2023, reason: "Malware distribution", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 33, url: "rumor-mill.co", domain: "rumor-mill.co", date: "2023-06-04", year: 2023, reason: "Misinformation", authority: "MEITy", status: "blocked", category: "Misinformation" },
+  { id: 34, url: "provocative-views.in", domain: "provocative-views.in", date: "2023-07-21", year: 2023, reason: "Incitement", authority: "State Police", status: "blocked", category: "Hate Speech" },
+  { id: 35, url: "copy-lawyers.com", domain: "copy-lawyers.com", date: "2023-08-30", year: 2023, reason: "Copyright", authority: "High Courts", status: "blocked", category: "Copyright" },
+  { id: 36, url: "neutral-news.org", domain: "neutral-news.org", date: "2024-01-11", year: 2024, reason: "Policy breach", authority: "MEITy", status: "partial", category: "Compliance" },
+  { id: 37, url: "attack-vector.net", domain: "attack-vector.net", date: "2024-02-25", year: 2024, reason: "DDoS tools", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 38, url: "celebrity-gossip.com", domain: "celebrity-gossip.com", date: "2024-03-05", year: 2024, reason: "Defamation", authority: "Civil Court", status: "blocked", category: "Defamation" },
+  { id: 39, url: "pirate-links.org", domain: "pirate-links.org", date: "2024-04-17", year: 2024, reason: "Piracy", authority: "Copyright Office", status: "blocked", category: "Copyright" },
+  { id: 40, url: "hate-camp.in", domain: "hate-camp.in", date: "2024-05-29", year: 2024, reason: "Hate speech", authority: "State Police", status: "blocked", category: "Hate Speech" },
+  { id: 41, url: "malicious-tools.io", domain: "malicious-tools.io", date: "2024-06-18", year: 2024, reason: "Malware", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 42, url: "policy-evade.co", domain: "policy-evade.co", date: "2024-07-09", year: 2024, reason: "Non-compliance", authority: "MEITy", status: "partial", category: "Compliance" },
+  { id: 43, url: "deepfake-videos.com", domain: "deepfake-videos.com", date: "2025-01-12", year: 2025, reason: "Synthetic misinformation", authority: "MEITy", status: "blocked", category: "Misinformation" },
+  { id: 44, url: "stolen-data.net", domain: "stolen-data.net", date: "2025-02-20", year: 2025, reason: "Data leak", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 45, url: "copyright-claim2.org", domain: "copyright-claim2.org", date: "2025-03-30", year: 2025, reason: "Piracy", authority: "High Courts", status: "blocked", category: "Copyright" },
+  { id: 46, url: "defame-again.com", domain: "defame-again.com", date: "2025-04-15", year: 2025, reason: "Defamation", authority: "Civil Court", status: "blocked", category: "Defamation" },
+  { id: 47, url: "old-rumors.co", domain: "old-rumors.co", date: "2025-05-06", year: 2025, reason: "Misinformation", authority: "MEITy", status: "partial", category: "Misinformation" },
+  { id: 48, url: "pirate-haven.io", domain: "pirate-haven.io", date: "2025-06-22", year: 2025, reason: "Piracy", authority: "Copyright Office", status: "blocked", category: "Copyright" },
+  { id: 49, url: "spam-network.com", domain: "spam-network.com", date: "2025-07-18", year: 2025, reason: "Spam/phishing", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 50, url: "controversy-blog.in", domain: "controversy-blog.in", date: "2025-08-09", year: 2025, reason: "Hate speech", authority: "State Police", status: "blocked", category: "Hate Speech" },
+  { id: 51, url: "policy-issue.net", domain: "policy-issue.net", date: "2025-09-02", year: 2025, reason: "Non-compliance", authority: "MEITy", status: "partial", category: "Compliance" },
+  { id: 52, url: "mirror-site.org", domain: "mirror-site.org", date: "2025-09-28", year: 2025, reason: "Mirror of infringing content", authority: "High Courts", status: "blocked", category: "Copyright" },
+  { id: 53, url: "attack-kit.io", domain: "attack-kit.io", date: "2025-10-11", year: 2025, reason: "Tools for attacks", authority: "Cybersecurity Agency", status: "blocked", category: "Security" },
+  { id: 54, url: "celebrity-smear.com", domain: "celebrity-smear.com", date: "2025-10-30", year: 2025, reason: "Defamation", authority: "Civil Court", status: "blocked", category: "Defamation" },
+  { id: 55, url: "legacy-pirate.net", domain: "legacy-pirate.net", date: "2025-11-01", year: 2025, reason: "Piracy", authority: "Copyright Office", status: "blocked", category: "Copyright" },
 ];
 
-// Year-wise blocking data
-const yearlyBlockingData = [
-  { year: 2020, blocked: 1245, unblocked: 45, partial: 12 },
-  { year: 2021, blocked: 1567, unblocked: 67, partial: 18 },
-  { year: 2022, blocked: 1834, unblocked: 89, partial: 23 },
-  { year: 2023, blocked: 2156, unblocked: 112, partial: 34 },
-  { year: 2024, blocked: 1890, unblocked: 98, partial: 28 },
+// Compute aggregates from the dataset so charts/filters always match the data
+const years = Array.from(new Set(blockedWebsites.map(s => s.year))).sort((a,b) => a - b);
+
+const yearlyBlockingData = years.map((y) => {
+  const items = blockedWebsites.filter(s => s.year === y);
+  return {
+    year: y,
+    blocked: items.filter(i => i.status === 'blocked').length,
+    unblocked: items.filter(i => i.status === 'unblocked').length,
+    partial: items.filter(i => i.status === 'partial').length,
+  };
+});
+
+// Category distribution (name, value, color)
+const palette = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  'hsl(var(--muted-foreground))',
 ];
 
-// Category distribution
-const categoryData = [
-  { name: "Copyright", value: 2456, color: "hsl(var(--chart-1))" },
-  { name: "Misinformation", value: 1834, color: "hsl(var(--chart-2))" },
-  { name: "Defamation", value: 1234, color: "hsl(var(--chart-3))" },
-  { name: "Hate Speech", value: 892, color: "hsl(var(--chart-4))" },
-  { name: "Security", value: 678, color: "hsl(var(--chart-5))" },
-  { name: "Compliance", value: 456, color: "hsl(var(--muted-foreground))" },
-];
+const categoryCounts: Record<string, number> = {};
+blockedWebsites.forEach(s => { categoryCounts[s.category] = (categoryCounts[s.category] || 0) + 1; });
+const categoryData = Object.entries(categoryCounts).map(([name, value], idx) => ({ name, value, color: palette[idx % palette.length] }));
 
 // Authority distribution
-const authorityData = [
-  { authority: "High Courts", count: 3421 },
-  { authority: "MEITy", count: 2845 },
-  { authority: "Supreme Court", count: 1123 },
-  { authority: "State Police", count: 892 },
-  { authority: "Other", count: 456 },
-];
+const authorityCounts: Record<string, number> = {};
+blockedWebsites.forEach(s => { authorityCounts[s.authority] = (authorityCounts[s.authority] || 0) + 1; });
+const authorityData = Object.entries(authorityCounts).map(([authority, count]) => ({ authority, count }));
 
 const BlockedWebsites = () => {
   const [searchQuery, setSearchQuery] = useState("");
