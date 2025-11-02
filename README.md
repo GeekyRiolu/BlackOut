@@ -35,7 +35,6 @@ What BlackOut tries to achieve
 
 ![Architecture](src/assets/Arch.png)
 
-(If the image does not render on your deployment, place the file at `docs/architecture.png` or point to a public URL.)
 
 
 ## Datasets
@@ -49,11 +48,11 @@ This project stores canonical data inside the repository under `src/data/` and c
 
 - Film dataset
 	- The repository contains a film censorship dataset (years 2019–2025) with deterministic cuts/reasons/appeals generation.
-	- [LINK_PLACEHOLDER] — add a link to the film dataset (or the CSV/JSON export) here.
+	- Link to Dataset: [https://dataful.in/datasets/21452/]
 
 - Blocked websites dataset
 	- The blocked websites dataset contains ~50–60 entries covering 2019–2025 and is used to compute charts and aggregates at runtime.
-	- [LINK_PLACEHOLDER] — add the blocked websites dataset link here.
+	- Link to Dataset: [[https://dataful.in/datasets/21452/](https://github.com/thejeshgn/blocked)]
 
 
 ## Getting started
