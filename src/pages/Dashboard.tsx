@@ -1,3 +1,28 @@
+import React, { useState, useMemo, useEffect } from "react";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  FileText,
+  TrendingUp,
+  AlertTriangle,
+  Globe,
+  MapPin,
+  X,
+  Filter,
+} from "lucide-react";
+
+// UI Components
 import { Navigation } from "@/components/Navigation";
 import { StatsCard } from "@/components/StatsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,32 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  FileText, 
-  TrendingUp, 
-  AlertTriangle,
-  Globe,
-  MapPin,
-  X,
-  Filter
-} from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
-import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ScatterChart,
-  Scatter
-} from "recharts";
-import OSMMap from "@/components/OSMMap";
 import {
   Pagination,
   PaginationContent,
@@ -46,8 +45,12 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-const IndiaMapWrapper = (props: any) => <OSMMap {...props} />;
+// Custom Components & Data
+import OSMMap from "@/components/OSMMap";
 import { incidents, filmCensorshipCases } from "@/data";
+
+// Wrapper to ensure props are passed correctly to the Map component
+const IndiaMapWrapper = (props: any) => <OSMMap {...props} />;
 
 const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,26 +64,31 @@ const Dashboard = () => {
   const stats = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const lastYear = currentYear - 1;
-    
+
     // Get years from dates
-    const incidentsThisYear = incidents.filter(inc => {
+    const incidentsThisYear = incidents.filter((inc) => {
       const year = new Date(inc.date).getFullYear();
       return year === currentYear;
     }).length;
-    
-    const incidentsLastYear = incidents.filter(inc => {
+
+    const incidentsLastYear = incidents.filter((inc) => {
       const year = new Date(inc.date).getFullYear();
       return year === lastYear;
     }).length;
-    
+
     const totalIncidents = incidents.length;
-    const activeCases = incidents.filter(inc => inc.status === "Pending" || inc.status === "Under Review").length;
-    const uniqueStates = new Set(incidents.map(inc => inc.state)).size;
-    
-    const yearOverYearChange = lastYear > 0 
-      ? Math.round(((incidentsThisYear - incidentsLastYear) / incidentsLastYear) * 100)
-      : 0;
-    
+    const activeCases = incidents.filter(
+      (inc) => inc.status === "Pending" || inc.status === "Under Review"
+    ).length;
+    const uniqueStates = new Set(incidents.map((inc) => inc.state)).size;
+
+    const yearOverYearChange =
+      lastYear > 0
+        ? Math.round(
+            ((incidentsThisYear - incidentsLastYear) / incidentsLastYear) * 100
+          )
+        : 0;
+
     return {
       total: totalIncidents,
       thisYear: incidentsThisYear,
@@ -93,18 +101,18 @@ const Dashboard = () => {
   // Calculate yearly trends
   const yearlyData = useMemo(() => {
     const yearMap = new Map<string, number>();
-    
-    incidents.forEach(inc => {
+
+    incidents.forEach((inc) => {
       const year = new Date(inc.date).getFullYear().toString();
       yearMap.set(year, (yearMap.get(year) || 0) + 1);
     });
-    
+
     // Include film censorship years if they have data
-    filmCensorshipCases.forEach(film => {
+    filmCensorshipCases.forEach((film) => {
       const year = film.year.toString();
       yearMap.set(year, (yearMap.get(year) || 0) + 1);
     });
-    
+
     return Array.from(yearMap.entries())
       .map(([year, incidents]) => ({ year, incidents }))
       .sort((a, b) => a.year.localeCompare(b.year));
@@ -113,12 +121,12 @@ const Dashboard = () => {
   // Calculate platform distribution
   const platformData = useMemo(() => {
     const platformMap = new Map<string, number>();
-    
-    incidents.forEach(inc => {
+
+    incidents.forEach((inc) => {
       const platform = inc.platform === "Website" ? "Websites" : inc.platform;
       platformMap.set(platform, (platformMap.get(platform) || 0) + 1);
     });
-    
+
     return Array.from(platformMap.entries())
       .map(([platform, count]) => ({ platform, count }))
       .sort((a, b) => b.count - a.count);
@@ -152,9 +160,18 @@ const Dashboard = () => {
       "hsl(var(--muted-foreground))",
     ];
 
-    const result: Array<{ name: string; value: number; color: string }> = major.map((m, i) => ({ name: m.name, value: m.value, color: colors[i % colors.length] }));
+    const result: Array<{ name: string; value: number; color: string }> =
+      major.map((m, i) => ({
+        name: m.name,
+        value: m.value,
+        color: colors[i % colors.length],
+      }));
     if (otherTotal > 0) {
-      result.push({ name: "Other", value: otherTotal, color: "hsl(var(--muted-foreground))" });
+      result.push({
+        name: "Other",
+        value: otherTotal,
+        color: "hsl(var(--muted-foreground))",
+      });
     }
 
     return result;
@@ -163,47 +180,48 @@ const Dashboard = () => {
   // Calculate state distribution
   const stateData = useMemo(() => {
     const stateMap = new Map<string, number>();
-    
-    incidents.forEach(inc => {
+
+    incidents.forEach((inc) => {
       stateMap.set(inc.state, (stateMap.get(inc.state) || 0) + 1);
     });
-    
+
     // Simple x,y coordinates for scatter plot (approximate positions)
+    // Note: These are fallback coords; OSMMap uses actual Lat/Lng
     const stateCoords: { [key: string]: { x: number; y: number } } = {
-      "Maharashtra": { x: 10, y: 15 },
-      "Delhi": { x: 8, y: 8 },
-      "Karnataka": { x: 7, y: 12 },
+      Maharashtra: { x: 10, y: 15 },
+      Delhi: { x: 8, y: 8 },
+      Karnataka: { x: 7, y: 12 },
       "Tamil Nadu": { x: 9, y: 18 },
       "West Bengal": { x: 10, y: 11 },
       "Uttar Pradesh": { x: 9, y: 9 },
-      "Gujarat": { x: 7, y: 13 },
-      "Kerala": { x: 8, y: 17 },
-      "Rajasthan": { x: 7, y: 10 },
-      "Telangana": { x: 8, y: 14 },
+      Gujarat: { x: 7, y: 13 },
+      Kerala: { x: 8, y: 17 },
+      Rajasthan: { x: 7, y: 10 },
+      Telangana: { x: 8, y: 14 },
       "Andhra Pradesh": { x: 8, y: 15 },
-      "Assam": { x: 11, y: 10 },
-      "Bihar": { x: 9, y: 10 },
-      "Haryana": { x: 8, y: 9 },
+      Assam: { x: 11, y: 10 },
+      Bihar: { x: 9, y: 10 },
+      Haryana: { x: 8, y: 9 },
       "Himachal Pradesh": { x: 7, y: 7 },
       "Jammu and Kashmir": { x: 7, y: 6 },
-      "Jharkhand": { x: 9, y: 11 },
+      Jharkhand: { x: 9, y: 11 },
       "Madhya Pradesh": { x: 8, y: 11 },
-      "Manipur": { x: 11, y: 9 },
-      "Nagaland": { x: 12, y: 9 },
-      "Odisha": { x: 9, y: 13 },
-      "Punjab": { x: 7, y: 8 },
-      "Uttarakhand": { x: 8, y: 8 },
+      Manipur: { x: 11, y: 9 },
+      Nagaland: { x: 12, y: 9 },
+      Odisha: { x: 9, y: 13 },
+      Punjab: { x: 7, y: 8 },
+      Uttarakhand: { x: 8, y: 8 },
       "All India": { x: 8, y: 10 },
     };
-    
+
     return Array.from(stateMap.entries())
       .map(([state, incidents]) => {
         const coords = stateCoords[state] || { x: 8, y: 10 };
-        return { 
-          state, 
-          incidents, 
-          x: coords.x, 
-          y: coords.y 
+        return {
+          state,
+          incidents,
+          x: coords.x,
+          y: coords.y,
         };
       })
       .sort((a, b) => b.incidents - a.incidents);
@@ -214,31 +232,39 @@ const Dashboard = () => {
     return incidents.filter((incident) => {
       const year = new Date(incident.date).getFullYear().toString();
       const matchesYear = !selectedYear || year === selectedYear;
-    const matchesCategory = !selectedCategory || incident.category === selectedCategory;
-      const matchesPlatform = !selectedPlatform || 
+      const matchesCategory =
+        !selectedCategory || incident.category === selectedCategory;
+      const matchesPlatform =
+        !selectedPlatform ||
         (selectedPlatform === "Websites" && incident.platform === "Website") ||
         incident.platform === selectedPlatform;
-    const matchesState = !selectedState || incident.state === selectedState;
-    return matchesYear && matchesCategory && matchesPlatform && matchesState;
-  });
+      const matchesState = !selectedState || incident.state === selectedState;
+      return matchesYear && matchesCategory && matchesPlatform && matchesState;
+    });
   }, [selectedYear, selectedCategory, selectedPlatform, selectedState]);
 
-  // Reset page when filters change so user sees first page of new results
+  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedYear, selectedCategory, selectedPlatform, selectedState]);
 
   const totalFiltered = filteredIncidents.length;
   const pageCount = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
-  const pagedIncidents = filteredIncidents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pagedIncidents = filteredIncidents.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   const handleChartClick = (data: any, chartType: string) => {
+    if (!data) return;
     if (chartType === "year") {
       setSelectedYear(data.year === selectedYear ? null : data.year);
     } else if (chartType === "category") {
       setSelectedCategory(data.name === selectedCategory ? null : data.name);
     } else if (chartType === "platform") {
-      setSelectedPlatform(data.platform === selectedPlatform ? null : data.platform);
+      setSelectedPlatform(
+        data.platform === selectedPlatform ? null : data.platform
+      );
     } else if (chartType === "state") {
       setSelectedState(data.state === selectedState ? null : data.state);
     }
@@ -261,14 +287,15 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             Graphical Trend Dashboard
           </h1>
           <p className="text-muted-foreground">
-            Interactive visualizations - click charts to filter data table. Click again to clear.
+            Interactive visualizations - click charts to filter data table. Click
+            again to clear.
           </p>
         </div>
 
@@ -283,13 +310,17 @@ const Dashboard = () => {
                   {activeFilters.map((filter, idx) => (
                     <Badge key={idx} variant="secondary" className="gap-1">
                       {filter}
-                      <X 
-                        className="h-3 w-3 cursor-pointer" 
+                      <X
+                        className="h-3 w-3 cursor-pointer"
                         onClick={() => {
-                          if (filter?.startsWith("Year:")) setSelectedYear(null);
-                          if (filter?.startsWith("Category:")) setSelectedCategory(null);
-                          if (filter?.startsWith("Platform:")) setSelectedPlatform(null);
-                          if (filter?.startsWith("State:")) setSelectedState(null);
+                          if (filter?.startsWith("Year:"))
+                            setSelectedYear(null);
+                          if (filter?.startsWith("Category:"))
+                            setSelectedCategory(null);
+                          if (filter?.startsWith("Platform:"))
+                            setSelectedPlatform(null);
+                          if (filter?.startsWith("State:"))
+                            setSelectedState(null);
                         }}
                       />
                     </Badge>
@@ -333,18 +364,23 @@ const Dashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle>Yearly Incident Trends</CardTitle>
-              <CardDescription>Number of documented incidents per year</CardDescription>
+              <CardDescription>
+                Number of documented incidents per year
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={yearlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="year" 
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
+                  <XAxis
+                    dataKey="year"
                     stroke="hsl(var(--muted-foreground))"
                   />
                   <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
@@ -352,8 +388,8 @@ const Dashboard = () => {
                     }}
                   />
                   <Legend />
-                  <Bar 
-                    dataKey="incidents" 
+                  <Bar
+                    dataKey="incidents"
                     fill="hsl(var(--chart-1))"
                     name="Incidents"
                     onClick={(data) => handleChartClick(data, "year")}
@@ -371,14 +407,19 @@ const Dashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle>Platform Distribution</CardTitle>
-              <CardDescription>Incidents by platform/medium</CardDescription>
+              <CardDescription>
+                Incidents by platform/medium
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={platformData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="platform" 
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                  />
+                  <XAxis
+                    dataKey="platform"
                     stroke="hsl(var(--muted-foreground))"
                     fontSize={12}
                     angle={-45}
@@ -386,15 +427,15 @@ const Dashboard = () => {
                     height={80}
                   />
                   <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
                       borderRadius: "8px",
                     }}
                   />
-                  <Bar 
-                    dataKey="count" 
+                  <Bar
+                    dataKey="count"
                     fill="hsl(var(--chart-2))"
                     name="Count"
                     onClick={(data) => handleChartClick(data, "platform")}
@@ -413,7 +454,10 @@ const Dashboard = () => {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Reasons for Takedowns</CardTitle>
-            <CardDescription>Distribution of incidents by stated reason - Click slices to filter</CardDescription>
+            <CardDescription>
+              Distribution of incidents by stated reason - Click slices to
+              filter
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -431,14 +475,14 @@ const Dashboard = () => {
                     onClick={(data) => handleChartClick(data, "category")}
                   >
                     {categoryData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
+                      <Cell
+                        key={`cell-${index}`}
                         fill={entry.color}
                         style={{ cursor: "pointer" }}
                       />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
@@ -447,21 +491,48 @@ const Dashboard = () => {
                   />
                 </PieChart>
               </ResponsiveContainer>
-              
+
               <div className="space-y-4">
                 {/* Small bar chart to complement pie */}
                 <div style={{ width: "100%", height: 180 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={categoryData} layout="vertical" margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis type="number" stroke="hsl(var(--muted-foreground))" />
-                      <YAxis type="category" dataKey="name" width={140} stroke="hsl(var(--muted-foreground))" />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                    <BarChart
+                      data={categoryData}
+                      layout="vertical"
+                      margin={{ top: 8, right: 8, left: 8, bottom: 8 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsl(var(--border))"
                       />
-                      <Bar dataKey="value" isAnimationActive={false} onClick={(d) => handleChartClick(d, "category")}>
+                      <XAxis
+                        type="number"
+                        stroke="hsl(var(--muted-foreground))"
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        width={140}
+                        stroke="hsl(var(--muted-foreground))"
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                        }}
+                      />
+                      <Bar
+                        dataKey="value"
+                        isAnimationActive={false}
+                        onClick={(d) => handleChartClick(d, "category")}
+                      >
                         {categoryData.map((entry, i) => (
-                          <Cell key={`bar-${i}`} fill={entry.color} style={{ cursor: 'pointer' }} />
+                          <Cell
+                            key={`bar-${i}`}
+                            fill={entry.color}
+                            style={{ cursor: "pointer" }}
+                          />
                         ))}
                       </Bar>
                     </BarChart>
@@ -471,21 +542,28 @@ const Dashboard = () => {
                 {/* Detailed list (clickable) */}
                 <div className="space-y-2 max-h-[200px] overflow-y-auto">
                   {categoryData.map((category, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
-                        selectedCategory === category.name 
-                          ? "bg-primary/10 border-2 border-primary" 
+                        selectedCategory === category.name
+                          ? "bg-primary/10 border-2 border-primary"
                           : "bg-muted/50 hover:bg-muted"
                       }`}
-                      onClick={() => handleChartClick({ name: category.name }, "category")}
+                      onClick={() =>
+                        handleChartClick(
+                          { name: category.name },
+                          "category"
+                        )
+                      }
                     >
                       <div className="flex items-center space-x-3">
-                        <div 
+                        <div
                           className="w-4 h-4 rounded"
                           style={{ backgroundColor: category.color }}
                         />
-                        <span className="font-medium text-foreground">{category.name}</span>
+                        <span className="font-medium text-foreground">
+                          {category.name}
+                        </span>
                       </div>
                       <span className="text-sm font-semibold text-muted-foreground">
                         {category.value.toLocaleString()}
@@ -502,19 +580,20 @@ const Dashboard = () => {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Geographic Distribution</CardTitle>
-            <CardDescription>State-wise incident hotspots - Click points to filter by state</CardDescription>
+            <CardDescription>
+              State-wise incident hotspots - Click points to filter by state
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* India map with clickable state hotspots */}
               <div className="w-full">
-                {/* Lazy import component to keep bundle small if needed later */}
-                {/* eslint-disable-next-line @typescript-eslint/no-var-requires */}
-                {/* @ts-ignore */}
                 <IndiaMapWrapper
                   states={stateData}
                   selectedState={selectedState}
-                  onSelectState={(st: string | null) => handleChartClick({ state: st }, 'state')}
+                  onSelectState={(st: string | null) =>
+                    handleChartClick({ state: st }, "state")
+                  }
                 />
               </div>
 
@@ -534,13 +613,19 @@ const Dashboard = () => {
                             ? "bg-primary/10 border-2 border-primary"
                             : "bg-muted/50 hover:bg-muted"
                         }`}
-                        onClick={() => handleChartClick({ state: state.state }, "state")}
+                        onClick={() =>
+                          handleChartClick({ state: state.state }, "state")
+                        }
                       >
                         <div className="flex items-center gap-3">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-foreground">{state.state}</span>
+                          <span className="font-medium text-foreground">
+                            {state.state}
+                          </span>
                         </div>
-                        <Badge variant="secondary">{state.incidents.toLocaleString()}</Badge>
+                        <Badge variant="secondary">
+                          {state.incidents.toLocaleString()}
+                        </Badge>
                       </div>
                     ))}
                 </div>
@@ -554,7 +639,8 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle>Filtered Incidents</CardTitle>
             <CardDescription>
-              {filteredIncidents.length} incident(s) matching current filters. Click charts above to filter.
+              {filteredIncidents.length} incident(s) matching current
+              filters. Click charts above to filter.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -576,10 +662,16 @@ const Dashboard = () => {
                     pagedIncidents.map((incident) => (
                       <TableRow
                         key={incident.id}
-                        className={`cursor-pointer ${selectedState === incident.state ? 'bg-primary/10 border-2 border-primary' : ''}`}
+                        className={`cursor-pointer ${
+                          selectedState === incident.state
+                            ? "bg-primary/10 border-2 border-primary"
+                            : ""
+                        }`}
                         onClick={() => setSelectedState(incident.state)}
                       >
-                        <TableCell className="font-medium">{incident.title}</TableCell>
+                        <TableCell className="font-medium">
+                          {incident.title}
+                        </TableCell>
                         <TableCell>
                           {new Date(incident.date).toLocaleDateString()}
                         </TableCell>
@@ -589,13 +681,19 @@ const Dashboard = () => {
                         <TableCell>
                           <Badge variant="outline">{incident.category}</Badge>
                         </TableCell>
-                        <TableCell className="max-w-xs truncate">{incident.legalReason}</TableCell>
+                        <TableCell className="max-w-xs truncate">
+                          {incident.legalReason}
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        No incidents match the current filters. Click on charts above to apply filters.
+                      <TableCell
+                        colSpan={7}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        No incidents match the current filters. Click on
+                        charts above to apply filters.
                       </TableCell>
                     </TableRow>
                   )}
@@ -609,15 +707,27 @@ const Dashboard = () => {
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        className={currentPage === 1 ? 'opacity-50 pointer-events-none' : ''}
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage((p) => Math.max(1, p - 1));
+                        }}
+                        className={
+                          currentPage === 1
+                            ? "opacity-50 pointer-events-none"
+                            : ""
+                        }
                       />
                     </PaginationItem>
                     {Array.from({ length: pageCount }).map((_, i) => (
                       <PaginationItem key={i}>
                         <PaginationLink
+                          href="#"
                           isActive={currentPage === i + 1}
-                          onClick={() => setCurrentPage(i + 1)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(i + 1);
+                          }}
                         >
                           {i + 1}
                         </PaginationLink>
@@ -625,8 +735,18 @@ const Dashboard = () => {
                     ))}
                     <PaginationItem>
                       <PaginationNext
-                        onClick={() => setCurrentPage((p) => Math.min(pageCount, p + 1))}
-                        className={currentPage === pageCount ? 'opacity-50 pointer-events-none' : ''}
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage((p) =>
+                            Math.min(pageCount, p + 1)
+                          );
+                        }}
+                        className={
+                          currentPage === pageCount
+                            ? "opacity-50 pointer-events-none"
+                            : ""
+                        }
                       />
                     </PaginationItem>
                   </PaginationContent>
